@@ -30,7 +30,9 @@ class Display < Gosu::Window
     @font.draw_text(
 "Branches #{@tree.size}, Active Leaves: #{@leaves.size}.
 First Active Leaf: #{@leaves.first&.x&.round}:#{@leaves.first&.y&.round}, alpha: #{@leaves.first&.color&.alpha}
-Window Width: #{self.width}, Height: #{self.height}",10, 10, 10)
+Branch spawn angle: #{$angle}, Branch angle drift: #{$angle_drift}
+Window Width: #{self.width}, Height: #{self.height}
+", 10, 10, 10)
     @tree.each do |branch|
       line(branch.start.x, branch.start.y, branch.end.x, branch.end.y, branch.color)
       if !branch.branched
