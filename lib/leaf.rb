@@ -1,8 +1,12 @@
 class Leaf
   attr_reader :x, :y, :color
-  def initialize(x, y, color = Gosu::Color.rgba(0, 255, 0, 200))
+  def initialize(x, y, color = nil)
     @origin_x, @origin_y = x, y
+    color ||= a_fall_color
+
     @x, @y, @color = x, y, color
+
+    @inital_alpha = color.alpha.to_f
 
     @fall_speed = 0.5..0.75
     @born = Gosu.milliseconds
@@ -23,12 +27,22 @@ class Leaf
     die?
   end
 
+  def a_fall_color
+    list = [
+      Gosu::Color.rgba(200, 255, 0, 200),
+      Gosu::Color.rgba(255, 200, 0, 200),
+      Gosu::Color.rgba(150, 150, 0, 200)
+    ]
+
+    list.sample
+  end
+
   def dynamic_alpha_from_distance
     total = Gosu.distance(@origin_x, @origin_y, @origin_x, $window.height)
     travel= Gosu.distance(@x, @y, @x, $window.height)
 
-    alpha = ((travel / total) * 100.0) * (255.0 / 100.0)
-    alpha = 255 if alpha > 255
+    alpha = ((travel / total) * 100.0) * (@inital_alpha / 100.0)
+    alpha = @inital_alpha if alpha > @inital_alpha
 
     # puts "total: #{total}, travel: #{travel}, total / travel: #{((travel / total) * 100).round(2)}% - #{self.object_id}" if @y > $window.height || alpha <= 10
     return alpha

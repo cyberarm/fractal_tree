@@ -21,7 +21,8 @@ class Display < Gosu::Window
 
     @last_drop = Gosu.milliseconds
     @leaf_fall = 40
-    @max_leaves = 50
+    @max_leaves = 127
+    @solo = 1024
 
     plant_tree
   end
@@ -29,7 +30,6 @@ class Display < Gosu::Window
   def draw
     @font.draw_text(
 "Branches #{@tree.size}, Active Leaves: #{@leaves.size}.
-First Active Leaf: #{@leaves.first&.x&.round}:#{@leaves.first&.y&.round}, alpha: #{@leaves.first&.color&.alpha}
 Branch spawn angle: #{$angle}, Branch angle drift: #{$angle_drift}
 Window Width: #{self.width}, Height: #{self.height}
 ", 10, 10, 10)
@@ -50,9 +50,9 @@ Window Width: #{self.width}, Height: #{self.height}
 
     if Gosu.milliseconds - @last_drop > @leaf_fall
       @tree.each do |branch|
-        next unless branch.branched
+        next if branch.branched
 
-        @leaves << Leaf.new(branch.end.x, branch.end.y) if rand(0..1000) == 50 if @leaves.size <= @max_leaves
+        @leaves << Leaf.new(branch.end.x, branch.end.y) if ((rand(-@solo..@solo) == @solo)) && @leaves.size <= @max_leaves
       end
 
       @last_drop = Gosu.milliseconds
