@@ -9,14 +9,14 @@ class Display < Gosu::Window
   attr_reader :tree, :leaves
   def initialize
     # super((Gosu.screen_width * 0.5).round, (Gosu.screen_height * 0.5).round, fullscreen: false)
-    super(Gosu.screen_width, Gosu.screen_height, true)
+    super(Gosu.screen_width, Gosu.screen_height, fullscreen: false)
     $window = self
     @font = Gosu::Font.new(20, name: "Consolas")
 
     @tree = []
     @leaves=[]
     @inital_length = 250
-    $angle = 15
+    $angle = 25
     $angle_drift = 0
 
     @last_drop = Gosu.milliseconds
@@ -33,12 +33,7 @@ class Display < Gosu::Window
 Branch spawn angle: #{$angle}, Branch angle drift: #{$angle_drift}
 Window Width: #{self.width}, Height: #{self.height}
 ", 10, 10, 10)
-    @tree.each do |branch|
-      line(branch.start.x, branch.start.y, branch.end.x, branch.end.y, branch.color)
-      if !branch.branched
-        draw_rect(branch.end.x-7, branch.end.y-4, 8, 8, Gosu::Color::GREEN)
-      end
-    end
+    @tree.each(&:draw)
 
     @leaves.each(&:draw)
   end
@@ -58,15 +53,17 @@ Window Width: #{self.width}, Height: #{self.height}
       @last_drop = Gosu.milliseconds
     end
 
+    # @tree.each(&:update)
     @leaves.each(&:update)
   end
 
-  def line(x,y, x2, y2, color, width = 6)
-    width.times do |i|
-      Gosu.draw_line(
-        x-i, y, color,
-        x2-i, y2, color
-      )
+  def line(x,y, x2, y2, color, thickness = 6)
+    offset = thickness / 2.0
+    angle = Gosu.angle(x, y, x2, y2)
+    distance = Gosu.distance(x,y, x2, y2)
+
+    Gosu.rotate(angle, x, y) do
+      Gosu.draw_rect(x-offset, y, offset, -distance, color)
     end
   end
 
@@ -75,11 +72,11 @@ Window Width: #{self.width}, Height: #{self.height}
     when Gosu::KbEscape
       close
     when Gosu::KbLeft
-      $angle -= 5
+      $angle -= 1
       regrow_tree
 
     when Gosu::KbRight
-      $angle += 5
+      $angle += 1
       regrow_tree
 
     when Gosu::KbUp

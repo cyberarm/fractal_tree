@@ -20,8 +20,8 @@ class Leaf
   end
 
   def update
-    @y+=(Math.cos(Gosu.milliseconds-@born / @scaler) * @fall_amplifier).abs
     @x+=((Math.sin((Gosu.milliseconds-@born) / @scaler)) * @amplifier)
+    @y+=(Math.cos(Gosu.milliseconds-@born / @scaler) * @fall_amplifier).abs
     @color.alpha = dynamic_alpha_from_distance
 
     die?
