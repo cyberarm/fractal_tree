@@ -18,22 +18,23 @@ class Leaf
   def update
     @y+=(Math.cos(Gosu.milliseconds-@born / @scaler) * @fall_amplifier).abs
     @x+=((Math.sin((Gosu.milliseconds-@born) / @scaler)) * @amplifier)
-    @color.alpha = dynamic_from_distance
+    @color.alpha = dynamic_alpha_from_distance
 
-    died
+    die?
   end
 
-  def dynamic_from_distance
-    total = Gosu.distance($window.width, $window.height, @origin_x, @origin_y)
-    travel= Gosu.distance($window.width, $window.height, @x, @y)
+  def dynamic_alpha_from_distance
+    total = Gosu.distance(@origin_x, @origin_y, @origin_x, $window.height)
+    travel= Gosu.distance(@x, @y, @x, $window.height)
 
-    alpha = ((total / travel) * 100.0) * (255.0 / 100.0)
+    alpha = ((travel / total) * 100.0) * (255.0 / 100.0)
     alpha = 255 if alpha > 255
 
+    # puts "total: #{total}, travel: #{travel}, total / travel: #{((travel / total) * 100).round(2)}% - #{self.object_id}" if @y > $window.height || alpha <= 10
     return alpha
   end
 
-  def died
+  def die?
     if @y > $window.height || @color.alpha <= 0
       @died = true
       $window.leaves.delete(self)
