@@ -43,15 +43,16 @@ class Leaf
   end
 
   def grow
-    @size+=0.05
-    @size = @max_size if @size > @max_size
+    @size = @max_size / ((@born + (@time_to_live * @grown_time)) / Gosu.milliseconds)
+
     @grown = true if Gosu.milliseconds >= @born + (@time_to_live * @grown_time)
   end
 
   def age
     if Gosu.milliseconds >= @born + (@time_to_live * @age_time)
-      @color.alpha-=1
-      @detached = true
+      n = rand
+      chance = n >= 0.005 && n <= 0.0051
+      @detached = true if chance
     end
   end
 
