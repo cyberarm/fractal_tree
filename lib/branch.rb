@@ -20,6 +20,8 @@ class Branch
     @bounce_scaler = 5_00.0
     @wind_amplifier = 1.0 # x axis
     @bounce_amplifier = 1.0 # y axis
+
+    grow_leaf
   end
 
   def branch
@@ -45,13 +47,17 @@ class Branch
 
   def draw
     $window.line(@start.x, @start.y, @end.x, @end.y, @color, @thickness)
-    if !@branched
-      Gosu.draw_rect(@end.x-7, @end.y-4, 8, 8, Gosu::Color::GREEN)
-    end
   end
 
   def update
     grow unless @grown
+
+    if @leaf.detached
+      if !@branched && @grown
+        grow_leaf
+      end
+    end
+
     animate if $debug && Gosu.button_down?(Gosu::KbBacktick)
   end
 
@@ -61,6 +67,8 @@ class Branch
     x = @end.x+(@current_length * Math.cos(direction))
     y = @end.y+(@current_length * Math.sin(direction))
 
+    @leaf.x, @leaf.y = x, y if @leaf
+
     @end = Vector[x, y]
 
     length = Gosu.distance(@start.x, @start.y, @end.x, @end.y)
@@ -68,6 +76,11 @@ class Branch
       @current_length = @length
       @grown = true
     end
+  end
+
+  def grow_leaf
+    @leaf = Leaf.new(@end.x, @end.y, true)
+    $window.leaves << @leaf
   end
 
   def animate

@@ -1,11 +1,14 @@
 class Vector
-  def x
-    self.element(0)
+  attr_accessor :x, :y, :z
+  def initialize(x = nil, y = nil, z = nil)
+    @x,@y,@z = x,y,z
   end
-  def y
-    self.element(1)
-  end
-  def z
-    self.element(2)
+
+  # def +(vector)
+  #   return Vector.new(@x+vector.x,)@y+vector.y)
+  # end
+
+  def self.[](x = nil, y = nil, z=nil)
+    return Vector.new(x,y,z)
   end
 end

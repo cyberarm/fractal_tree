@@ -1,5 +1,4 @@
 require "gosu"
-require "matrix"
 
 require_relative "lib/vector_ext"
 require_relative "lib/branch"
@@ -24,7 +23,7 @@ class Display < Gosu::Window
 
     @last_drop = Gosu.milliseconds
     @leaf_fall = 40
-    @max_leaves = 127
+    @max_leaves = @max_branches#127
     @solo = 1024
 
     plant_tree
@@ -32,7 +31,7 @@ class Display < Gosu::Window
 
   def draw
     @font.draw_text(
-"Branches #{@tree.size}/#{@max_branches}, Active Leaves: #{@leaves.size}.
+"Branches #{@tree.size}/#{@max_branches}, Leaves: #{@leaves.size}/#{@max_leaves}.
 Branch growth speed: #{@growth_speed.round(4)}, Branch spawn angle: #{$angle}, Branch angle drift: #{$angle_drift}
 Window Width: #{self.width}, Height: #{self.height}
 ", 10, 10, 10) if $debug
@@ -53,16 +52,6 @@ Window Width: #{self.width}, Height: #{self.height}
     self.caption = "Branches: #{@tree.size}"
 
     branch_out
-
-    if Gosu.milliseconds - @last_drop > @leaf_fall
-      @tree.each do |branch|
-        next if branch.branched || !branch.grown
-
-        @leaves << Leaf.new(branch.end.x, branch.end.y) if ((rand(-@solo..@solo) == @solo)) && @leaves.size <= @max_leaves
-      end
-
-      @last_drop = Gosu.milliseconds
-    end
 
     @tree.reverse.each(&:update)
     @leaves.each(&:update)
