@@ -3,6 +3,7 @@ class Leaf
   def initialize(x, y, branch_is_sapling = false, color = nil)
     @origin_x, @origin_y = x, y
     color ||= a_leaf_color
+    @fall_color = a_fall_color
 
     @x, @y, @color = x, y, color
     @size = 1
@@ -48,12 +49,21 @@ class Leaf
 
   def grow
     @size = @max_size / ((@born + (@time_to_live * @grown_time)) / Gosu.milliseconds)
-
-    @grown = true if Gosu.milliseconds >= @born + (@time_to_live * @grown_time)
+    if Gosu.milliseconds >= @born + (@time_to_live * @grown_time)
+      @grown = true
+    end
   end
 
   def age
+    factor = (Gosu.milliseconds / (@born + (@time_to_live * @age_time))) # BROKEN
+    # p factor#.clamp(0.0, 1.0)
+    # puts "MS: #{Gosu.milliseconds}, Growth: #{@finished_growing}, Born: #{@born}, live: #{@time_to_live}, Die at: #{(@born + (@time_to_live * @age_time))}"
+    # puts
+    factor = factor.clamp(0, 1.0)
+    fade_to_fall_color(factor)
+
     if Gosu.milliseconds >= @born + (@time_to_live * @age_time)
+      # raise "Factor was #{factor.round(4)}, not 1.0" if factor != 1.0
       n = rand
       chance = n >= (0.005) && n <= 0.0051
       chance = true if @branch_is_sapling
@@ -65,6 +75,15 @@ class Leaf
     @x+=((Math.sin((Gosu.milliseconds-@born) / @scaler)) * @amplifier)
     @y+=(Math.cos(Gosu.milliseconds-@born / @scaler) * @fall_amplifier).abs
     @color.alpha = dynamic_alpha_from_distance
+  end
+
+  def fade_to_fall_color(factor)
+    @color = Gosu::Color.rgba(
+      @color.red   + factor * (@fall_color.red  - @color.red  ),
+      @color.green + factor * (@fall_color.green- @color.green),
+      @color.blue  + factor * (@fall_color.blue - @color.blue),
+      @color.alpha
+    )
   end
 
   def a_fall_color
