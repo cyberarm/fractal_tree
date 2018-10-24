@@ -8,8 +8,8 @@ class Branch
     @length = length
     @parent   = parent
 
-    @thickness = 6#@length# * 0.4
-    @shortener = 0.67
+    @thickness = $window.branch_thickness
+    @shortener = $window.magic_divider
     @branched = false
     @grown = false
     @current_length = 0
@@ -23,27 +23,24 @@ class Branch
   end
 
   def branch
+    return if $window.tree.size+2 > $window.max_branches
     return unless @grown
     return if @branched
     return if @length < 10
+
     @branched = true
-    _angle = 0
-    begin
-      _angle = Math.tan((@end.y - @start.y) / (@end.x - @start.x))
-    rescue ZeroDivisionError
-    end
 
     direction = (Gosu.angle(@start.x, @start.y, @end.x, @end.y) + ($angle - rand($angle_drift))).gosu_to_radians
     x = @end.x+(@length * Math.cos(direction))
     y = @end.y+(@length * Math.sin(direction))
 
-    @tree << Branch.new(@end.x, @end.y, x, y, @tree, (@length * rand(@shortener..0.7)), self)
+    @tree << Branch.new(@end.x, @end.y, x, y, @tree, (@length * rand(@shortener..@shortener+0.03)), self)
 
     direction = (Gosu.angle(@start.x, @start.y, @end.x, @end.y) - ($angle + rand($angle_drift))).gosu_to_radians
     x = @end.x+(@length * Math.cos(direction))
     y = @end.y+(@length * Math.sin(direction))
 
-    @tree << Branch.new(@end.x, @end.y, x, y, @tree, (@length * rand(@shortener..0.75)), self)
+    @tree << Branch.new(@end.x, @end.y, x, y, @tree, (@length * rand(@shortener..@shortener+0.08)), self)
   end
 
   def draw

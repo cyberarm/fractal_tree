@@ -6,7 +6,7 @@ require_relative "lib/branch"
 require_relative "lib/leaf"
 
 class Display < Gosu::Window
-  attr_reader :tree, :leaves, :max_leaves, :growth_speed
+  attr_reader :tree, :leaves, :max_leaves, :growth_speed, :max_branches, :branch_thickness, :magic_divider
   def initialize
     super(Gosu.screen_width, Gosu.screen_height, fullscreen: true)
     $window = self
@@ -14,8 +14,11 @@ class Display < Gosu::Window
 
     @tree = []
     @leaves=[]
-    @inital_length = 300
+    @inital_length = 250
+    @branch_thickness = 6
+    @magic_divider = 0.67 # how much to shorten each consecutive branch by (length * devider)
     @growth_speed = 0.1
+    @max_branches = 2048# 16_386
     $angle = 25
     $angle_drift = 0
 
@@ -29,11 +32,19 @@ class Display < Gosu::Window
 
   def draw
     @font.draw_text(
-"Branches #{@tree.size}, Active Leaves: #{@leaves.size}.
+"Branches #{@tree.size}/#{@max_branches}, Active Leaves: #{@leaves.size}.
 Branch growth speed: #{@growth_speed.round(4)}, Branch spawn angle: #{$angle}, Branch angle drift: #{$angle_drift}
 Window Width: #{self.width}, Height: #{self.height}
 ", 10, 10, 10) if $debug
-    @tree.each(&:draw)
+
+    # if $window.tree.size+2 > $window.max_branches
+    #   @branches_texture ||= Gosu.record(self.width, self.height) do
+    #     @tree.each(&:draw)
+    #   end
+    #   @branches_texture.draw(0,0,0)
+    # else
+      @tree.each(&:draw)
+    # end
 
     @leaves.each(&:draw)
   end
