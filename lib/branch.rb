@@ -20,12 +20,13 @@ class Branch
     @bounce_scaler = 5_00.0
     @wind_amplifier = 1.0 # x axis
     @bounce_amplifier = 1.0 # y axis
-
-    grow_leaf
   end
 
   def branch
-    return if $window.tree.size+2 > $window.max_branches
+    if $window.tree.size+2 > $window.max_branches
+      @grown = true
+      return
+    end
     return unless @grown
     return if @branched
     return if @length < 10
@@ -52,8 +53,21 @@ class Branch
   def update
     grow unless @grown
 
-    if @leaf.detached
-      if !@branched && @grown
+    if @leaf
+      if @leaf.branch_is_sapling
+        if @branched
+          @leaf.dead = true
+          @leaf = nil
+        elsif @grown && !@branched
+          @leaf.dead = true
+          @leaf = nil
+        end
+      end
+
+    else
+      if !@branched && !@grown
+        grow_leaf(true)
+      elsif @grown && @length <= ($window.inital_length * 0.1) # Top branch
         grow_leaf
       end
     end
@@ -78,8 +92,9 @@ class Branch
     end
   end
 
-  def grow_leaf
-    @leaf = Leaf.new(@end.x, @end.y, true)
+  def grow_leaf(sapling = false)
+    return if $window.leaves.size >= $window.max_leaves
+    @leaf = Leaf.new(@end.x, @end.y, sapling)
     $window.leaves << @leaf
   end
 

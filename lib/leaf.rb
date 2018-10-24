@@ -1,8 +1,8 @@
 class Leaf
-  attr_accessor :detached, :x, :y, :color, :dead
+  attr_accessor :detached, :x, :y, :color, :dead, :branch_is_sapling
   def initialize(x, y, branch_is_sapling = false, color = nil)
     @origin_x, @origin_y = x, y
-    color ||= a_fall_color
+    color ||= a_leaf_color
 
     @x, @y, @color = x, y, color
     @size = 1
@@ -14,13 +14,15 @@ class Leaf
     @grown = false
     @adult = false
     @detached = false
+    @branch_is_sapling = branch_is_sapling
 
     if branch_is_sapling
-      @color= Gosu::Color.rgba(50, 200, 0, 225)
+      @time_to_live = rand(1_500..5_000)
+      @size = 3
     end
 
     @born = Gosu.milliseconds
-    @time_to_live = rand(15_000..60_000)
+    @time_to_live ||= rand(15_000..60_000)
     @grown_time = 0.5 # 50%
     @age_time = 0.8 # 80%-50% -> 30%
 
@@ -35,9 +37,11 @@ class Leaf
   end
 
   def update
-    grow unless @grown
-    age if @grown
-    fall if @detached
+    unless @branch_is_sapling
+      grow unless @grown
+      age if @grown
+    end
+      fall if @detached
 
     die?
   end
@@ -51,7 +55,8 @@ class Leaf
   def age
     if Gosu.milliseconds >= @born + (@time_to_live * @age_time)
       n = rand
-      chance = n >= 0.005 && n <= 0.0051
+      chance = n >= (0.005) && n <= 0.0051
+      chance = true if @branch_is_sapling
       @detached = true if chance
     end
   end
@@ -72,6 +77,14 @@ class Leaf
     list.sample
   end
 
+  def a_leaf_color
+    list = [
+      Gosu::Color.rgba(50, 200, 0, 200)
+    ]
+
+    list.sample
+  end
+
   def dynamic_alpha_from_distance
     total = Gosu.distance(@origin_x, @origin_y, @origin_x, $window.height)
     travel= Gosu.distance(@x, @y, @x, $window.height)
@@ -84,8 +97,8 @@ class Leaf
   end
 
   def die?
-    if @y > $window.height || @color.alpha <= 0
-      @died = true
+    if @dead || (@y > $window.height || @color.alpha <= 0)
+      @dead = true
       $window.leaves.delete(self)
     end
   end

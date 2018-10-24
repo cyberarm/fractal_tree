@@ -5,7 +5,7 @@ require_relative "lib/branch"
 require_relative "lib/leaf"
 
 class Display < Gosu::Window
-  attr_reader :tree, :leaves, :max_leaves, :growth_speed, :max_branches, :branch_thickness, :magic_divider
+  attr_reader :tree, :leaves, :max_leaves, :growth_speed, :max_branches, :branch_thickness, :magic_divider, :inital_length
   def initialize
     super(Gosu.screen_width, Gosu.screen_height, fullscreen: true)
     $window = self
