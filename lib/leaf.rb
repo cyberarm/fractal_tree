@@ -55,10 +55,7 @@ class Leaf
   end
 
   def age
-    factor = (Gosu.milliseconds / (@born + (@time_to_live * @age_time))) # BROKEN
-    # p factor#.clamp(0.0, 1.0)
-    # puts "MS: #{Gosu.milliseconds}, Growth: #{@finished_growing}, Born: #{@born}, live: #{@time_to_live}, Die at: #{(@born + (@time_to_live * @age_time))}"
-    # puts
+    factor = ((Gosu.milliseconds - (@born + (@time_to_live * @grown_time))) / (@born + (@time_to_live * @age_time))) # Working, maybe?
     factor = factor.clamp(0, 1.0)
     fade_to_fall_color(factor)
 
