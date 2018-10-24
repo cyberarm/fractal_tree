@@ -6,16 +6,16 @@ require_relative "lib/branch"
 require_relative "lib/leaf"
 
 class Display < Gosu::Window
-  attr_reader :tree, :leaves
+  attr_reader :tree, :leaves, :max_leaves, :growth_speed
   def initialize
-    # super((Gosu.screen_width * 0.5).round, (Gosu.screen_height * 0.5).round, fullscreen: false)
-    super(Gosu.screen_width, Gosu.screen_height, fullscreen: false)
+    super(Gosu.screen_width, Gosu.screen_height, fullscreen: true)
     $window = self
     @font = Gosu::Font.new(20, name: "Consolas")
 
     @tree = []
     @leaves=[]
-    @inital_length = 250
+    @inital_length = 300
+    @growth_speed = 0.1
     $angle = 25
     $angle_drift = 0
 
@@ -30,9 +30,9 @@ class Display < Gosu::Window
   def draw
     @font.draw_text(
 "Branches #{@tree.size}, Active Leaves: #{@leaves.size}.
-Branch spawn angle: #{$angle}, Branch angle drift: #{$angle_drift}
+Branch growth speed: #{@growth_speed.round(4)}, Branch spawn angle: #{$angle}, Branch angle drift: #{$angle_drift}
 Window Width: #{self.width}, Height: #{self.height}
-", 10, 10, 10)
+", 10, 10, 10) if $debug
     @tree.each(&:draw)
 
     @leaves.each(&:draw)
@@ -45,7 +45,7 @@ Window Width: #{self.width}, Height: #{self.height}
 
     if Gosu.milliseconds - @last_drop > @leaf_fall
       @tree.each do |branch|
-        next if branch.branched
+        next if branch.branched || !branch.grown
 
         @leaves << Leaf.new(branch.end.x, branch.end.y) if ((rand(-@solo..@solo) == @solo)) && @leaves.size <= @max_leaves
       end
@@ -53,7 +53,7 @@ Window Width: #{self.width}, Height: #{self.height}
       @last_drop = Gosu.milliseconds
     end
 
-    # @tree.each(&:update)
+    @tree.reverse.each(&:update)
     @leaves.each(&:update)
   end
 
@@ -69,11 +69,19 @@ Window Width: #{self.width}, Height: #{self.height}
 
   def button_up(id)
     case id
+    when Gosu::KbTab
+      $debug = !$debug
     when Gosu::KbEscape
       close
     when Gosu::KbLeft
       $angle -= 1
       regrow_tree
+
+    when Gosu::KB_EQUALS, Gosu::KB_NUMPAD_PLUS
+      @growth_speed+=0.025
+    when Gosu::KB_MINUS, Gosu::KB_NUMPAD_MINUS
+      @growth_speed-=0.025
+      @growth_speed = 0.1 if @growth_speed < 0.1
 
     when Gosu::KbRight
       $angle += 1
@@ -101,10 +109,7 @@ Window Width: #{self.width}, Height: #{self.height}
   end
 
   def branch_out
-    list = []
-    @tree.each {|b| list << b}
-
-    list.each(&:branch)
+    @tree.each(&:branch)
   end
 end
 
