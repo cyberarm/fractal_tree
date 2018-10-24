@@ -53,6 +53,8 @@ class Branch
   def update
     grow unless @grown
 
+    @leaf = nil if @leaf&.dead
+
     if @leaf
       if @leaf.branch_is_sapling
         if @branched

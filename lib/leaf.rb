@@ -23,7 +23,7 @@ class Leaf
     end
 
     @born = Gosu.milliseconds
-    @time_to_live ||= rand(15_000..60_000)
+    @time_to_live ||= rand(45_000..60_000)
     @grown_time = 0.5 # 50%
     @age_time = 0.8 # 80%-50% -> 30%
 
@@ -62,7 +62,7 @@ class Leaf
     if Gosu.milliseconds >= @born + (@time_to_live * @age_time)
       # raise "Factor was #{factor.round(4)}, not 1.0" if factor != 1.0
       n = rand
-      chance = n >= (0.005) && n <= 0.0051
+      chance = n >= (0.05) && n <= 0.051
       chance = true if @branch_is_sapling
       @detached = true if chance
     end
