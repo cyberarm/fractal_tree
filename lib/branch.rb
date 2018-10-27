@@ -5,7 +5,7 @@ class Branch
     @end   = Vector[x1,y1]
     @target= Vector[x2,y2]
     @tree = tree
-    @length = length
+    @length = (length * rand(0.75..1.0))
     @parent   = parent
 
     @thickness = $window.branch_thickness
